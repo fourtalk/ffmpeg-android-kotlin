@@ -1,0 +1,6 @@
+[submodule "ffmpeg"]
+	path = ffmpeg
+	url = git://source.ffmpeg.org/ffmpeg.git
+[submodule "openh264"]
+	path = openh264
+	url = https://github.com/cisco/openh264.git
