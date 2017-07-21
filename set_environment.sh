@@ -31,29 +31,29 @@ set_ndk_path()
 {
     TEST_PATH=${1}
     if test "x$TEST_PATH" = "x" || test ! -e "$TEST_PATH/ndk-build"; then
-		return 1
+        return 1
     else
-		export ANDROID_NDK_ROOT="$TEST_PATH"
-		return 0
+        export ANDROID_NDK_ROOT="$TEST_PATH"
+        return 0
     fi
 
     TEST_PATH=`get_path_true_case $1`
-	printf "TEST_PATH: '$1' >> '$TEST_PATH'\n"
+    printf "set_ndk_path: '$1' >> '$TEST_PATH'\n"
 
     if [ "$TEST_PATH" = "" ]; then
-	return 1
+        return 1
     fi
     if test "x$TEST_PATH" = "x" || test ! -e "$TEST_PATH/ndk-build"; then
-	return 1
+        return 1
     else
-	export ANDROID_NDK_ROOT="$TEST_PATH"
-	return 0
+        export ANDROID_NDK_ROOT="$TEST_PATH"
+        return 0
     fi
 }
 
 if ! set_ndk_path "$ANDROID_NDK_ROOT"; then
     if ! set_ndk_path "$HOME/library/android/sdk/ndk-bundle"; then
-	if ! set_ndk_path "$HOME/android/sdk/ndk-bundle"; then
+	if ! set_ndk_path "$HOME/Android/Sdk/ndk-bundle"; then
 	if ! set_ndk_path "/mnt/r/Android/sdk-linux/ndk-bundle"; then
 	if ! set_ndk_path "/mnt/r/Android/sdk/ndk-bundle-linux"; then
 	    printf "${RED}ANDROID_NDK_ROOT is not set or invalid, and can't be found automatically${NC}\nPlease notice, that it should point to ${GREEN}MacOS/Linux version${NC} of NDK\n\n"
