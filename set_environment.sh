@@ -53,14 +53,14 @@ set_ndk_path()
 
 if ! set_ndk_path "$ANDROID_NDK_ROOT"; then
     if ! set_ndk_path "$HOME/library/android/sdk/ndk-bundle"; then
-	if ! set_ndk_path "$HOME/Android/Sdk/ndk-bundle"; then
-	if ! set_ndk_path "/mnt/r/Android/sdk-linux/ndk-bundle"; then
-	if ! set_ndk_path "/mnt/r/Android/sdk/ndk-bundle-linux"; then
+    if ! set_ndk_path "$HOME/Android/Sdk/ndk-bundle"; then
+    if ! set_ndk_path "/mnt/r/Android/sdk-linux/ndk-bundle"; then
+    if ! set_ndk_path "/mnt/r/Android/sdk/ndk-bundle-linux"; then
 	    printf "${RED}ANDROID_NDK_ROOT is not set or invalid, and can't be found automatically${NC}\nPlease notice, that it should point to ${GREEN}MacOS/Linux version${NC} of NDK\n\n"
 	    exit 1
-	fi
-	fi
-	fi
+    fi
+    fi
+    fi
     fi
 fi
 
