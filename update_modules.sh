@@ -16,5 +16,3 @@ git submodule update --init || exit 1
 
 echo "Done!"
 echo "============================================"
-
-$SHELL

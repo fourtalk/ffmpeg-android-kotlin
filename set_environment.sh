@@ -1,7 +1,6 @@
-﻿#!/bin/bash
+#!/bin/bash
 
 BASEDIR=$(pwd)
-printf "BASEDIR=$BASEDIR\n\n"
 
 RED='\033[1;31m'
 GREEN='\033[1;32m'
@@ -55,8 +54,8 @@ set_ndk_path()
 if ! set_ndk_path "$ANDROID_NDK_ROOT"; then
     if ! set_ndk_path "$HOME/library/android/sdk/ndk-bundle"; then
 	if ! set_ndk_path "$HOME/android/sdk/ndk-bundle"; then
-	if ! set_ndk_path "/r/Android/sdk/ndk-bundle-linux"; then
-	if ! set_ndk_path "/r/Android/sdk/ndk-bundle"; then
+	if ! set_ndk_path "/mnt/r/Android/sdk-linux/ndk-bundle"; then
+	if ! set_ndk_path "/mnt/r/Android/sdk/ndk-bundle-linux"; then
 	    printf "${RED}ANDROID_NDK_ROOT is not set or invalid, and can't be found automatically${NC}\nPlease notice, that it should point to ${GREEN}MacOS/Linux version${NC} of NDK\n\n"
 	    exit 1
 	fi
@@ -65,9 +64,11 @@ if ! set_ndk_path "$ANDROID_NDK_ROOT"; then
     fi
 fi
 
-printf "${GREEN}ndk = $ANDROID_NDK_ROOT ${NC}\n\n"
-
 #===========================================================
+#[[ ":$PATH:" != *":/mnt/r/Android/sdk-linux/ndk-bundle:"* ]] && PATH="/mnt/r/Android/sdk-linux/ndk-bundle:${PATH}"
+#[[ ":$PATH:" != *":/mnt/r/Android/sdk-linux/platform-tools:"* ]] && PATH="/mnt/r/Android/sdk-linux/platform-tools:${PATH}"
+#[[ ":$PATH:" != *":/mnt/r/Android/sdk-linux/tools:"* ]] && PATH="/mnt/r/Android/sdk-linux/tools:${PATH}"
+#printf "PATH = $PATH\n\n"
 
 ANDROID_TARGET_API_VERSION=25
 ANDROID_API_VERSION=16

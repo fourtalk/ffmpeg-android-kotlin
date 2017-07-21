@@ -3,6 +3,9 @@
 . set_environment.sh
 . set_build_arch.sh
 
+printf "${GREEN}ndk = $ANDROID_NDK_ROOT ${NC}\n"
+printf "BASEDIR=$BASEDIR\n"
+
 rm -rf build
 
 for i in "${SUPPORTED_ARCHITECTURES[@]}"
@@ -16,5 +19,3 @@ do
 done
 
 rm -rf ${TOOLCHAIN_PREFIX}
-
-$SHELL
