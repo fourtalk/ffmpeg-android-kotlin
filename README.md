@@ -13,13 +13,13 @@ Supported Host Environments
 ---
 * MacOS
 * Linux
-* Windows10 Linux Subsystem
+* Windows10 Linux Subsystem (**NOTE:** you have to set ANDROID_NDK_ROOT to LINUX version of Android SDK / NDK / build tools)
 
 Instructions
 ----
 * Set environment variable
   [default](set_environment.sh#L54): `~/Android/Sdk/ndk-bundle`  
-  or set it manually: `export ANDROID_NDK={Android NDK Base Path}`  
+  or set it manually: `export ANDROID_NDK_ROOT={Android NDK Base Path}`  
 * Run following commands to compile ffmpeg
   1. `sudo apt-get --quiet --yes install build-essential git autoconf libtool pkg-config gperf gettext yasm python-lxml nasm`
   2. `./update_modules.sh` - update submodules and libraries
