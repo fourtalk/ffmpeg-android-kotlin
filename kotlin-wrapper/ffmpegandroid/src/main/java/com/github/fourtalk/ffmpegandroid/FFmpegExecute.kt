@@ -28,9 +28,9 @@ internal class FFmpegExecuteAsyncTask(
 
             fun getOutputFromProcess(process: Process): CommandResult {
                 val output = if (success(process.exitValue()))
-                    Utils.convertInputStreamToString(process.inputStream)
+                    convertInputStreamToString(process.inputStream)
                 else
-                    Utils.convertInputStreamToString(process.errorStream)
+                    convertInputStreamToString(process.errorStream)
                 return CommandResult(success(process.exitValue()), output)
             }
 
@@ -92,7 +92,7 @@ internal class FFmpegExecuteAsyncTask(
 
     @Throws(TimeoutException::class, InterruptedException::class)
     private fun checkAndUpdateProcess() {
-        while (!Utils.isProcessCompleted(process)) {
+        while (!isProcessCompleted(process)) {
             Log.d(TAG, "#checkAndUpdateProcess 1")
 
             // Handling timeout
@@ -119,7 +119,7 @@ internal class FFmpegExecuteAsyncTask(
     }
 
     val isProcessCompleted: Boolean
-        get() = Utils.isProcessCompleted(process)
+        get() = isProcessCompleted(process)
 
     private fun isAssetFileSizeDiffer(file: File): Boolean {
         try {
@@ -140,7 +140,7 @@ internal class FFmpegExecuteAsyncTask(
             return false
         }
         if (!file.exists()) {
-            val isFileCopied = Utils.copyBinaryFromAssetsToData(context,
+            val isFileCopied = copyBinaryFromAssetsToData(context,
                     fileNameFromAssets = NativeCpuHelper.assetsDir + File.separator + file.name,
                     outputFileName = file.name)
 
@@ -157,8 +157,8 @@ internal class FFmpegExecuteAsyncTask(
     }
 
     private fun checkBinary(): Boolean {
-        val ffmpegFile = File(Utils.getFFmpeg(context))
-        val h264File = File(Utils.getH264(context))
+        val ffmpegFile = File(getFFmpeg(context))
+        val h264File = File(getH264(context))
         return prepareFile(h264File) && prepareFile(ffmpegFile)
     }
 
@@ -188,9 +188,9 @@ internal class FFmpegExecuteAsyncTask(
                     exitValue = process.waitFor()
 
                     output = if (CommandResult.success(exitValue))
-                        Utils.convertInputStreamToString(process.inputStream)
+                        convertInputStreamToString(process.inputStream)
                     else
-                        Utils.convertInputStreamToString(process.errorStream)
+                        convertInputStreamToString(process.errorStream)
                 }
             } catch (e: InterruptedException) {
                 Log.e(TAG, "Interrupt exception", e)

@@ -1,56 +1,45 @@
 package com.github.fourtalk.ffmpegandroid
 
 import android.content.Context
+import android.media.MediaMetadataRetriever
+import android.net.Uri
+import android.os.Build
+import java.io.FileNotFoundException
 
 // !warn : names are compatible with WritingMinds/ffmpeg-android-java project
 
-class FFmpegCommandAlreadyRunningException(message: String) : Exception(message)
+open class FFmpegException(message: String) : Exception(message)
 
-class FFmpegNotSupportedException(message: String) : Exception(message)
+class FFmpegCommandAlreadyRunningException(message: String) : FFmpegException(message)
 
-interface FFmpegLoadBinaryResponseHandler {
-    /**
-     * on Fail
-     */
-    fun onFailure() {}
-
-    /**
-     * on Success
-     */
-    fun onSuccess() {}
-}
+class FFmpegNotSupportedException(message: String) : FFmpegException(message)
 
 interface FFmpegExecuteResponseHandler {
-    /**
-     * on Start
-     */
     fun onStart() {}
 
-    /**
-     * on Finish
-     */
     fun onFinish() {}
 
     /**
-     * on Success
      * @param message complete output of the FFmpeg command
      */
     fun onSuccess(message: String?)
 
     /**
-     * on Progress
      * @param message current output of FFmpeg command
      */
     fun onProgress(message: String?)
 
     /**
-     * on Failure
      * @param message complete output of the FFmpeg command
      */
     fun onFailure(message: String?)
 }
 
-internal interface FFmpegInterface {
+/**
+ * FFmpeg wrapper
+ * usage sample : com.github.fourtalk.kotlin_wrapper.Converter
+ */
+interface FFmpegInterface {
     /**
      * Load binary to the device according to archituecture. This also updates FFmpeg binary if the binary on device have old version.
      * Executes a command
@@ -88,6 +77,19 @@ internal interface FFmpegInterface {
      */
     fun setTimeout(timeout: Long)
 
+    class VideoInfo(
+            val fileSize: Long,
+            val width: Int,
+            val height: Int,
+            val rotation: Int,
+            val duration: Long
+    )
+
+    /**
+     * Get [VideoInfo] of [url]
+     */
+    @Throws(FileNotFoundException::class)
+    fun getVideoInfo(context: Context, url: Uri): VideoInfo
 }
 
 class FFmpeg private constructor(context: Context) : FFmpegInterface {
@@ -95,6 +97,37 @@ class FFmpeg private constructor(context: Context) : FFmpegInterface {
     private val context: Context = context.applicationContext
     private var ffmpegExecuteAsyncTask: FFmpegExecuteAsyncTask? = null
     private var timeout = java.lang.Long.MAX_VALUE
+
+    override fun getVideoInfo(context: Context, url: Uri): FFmpegInterface.VideoInfo {
+        val inputSize = openContentInputStream(context, url).use {
+            it.getInputStreamReadLength()
+        }.toLong()
+
+        var duration: Long = 0L
+        var w: Int = 0
+        var h: Int = 0
+        var r: Int = 0
+        val retriever = MediaMetadataRetriever()
+        try {
+            retriever.setDataSource(context, url)
+            duration = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION).toLongOrNull() ?: 0L
+            r = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1)
+                retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION).toIntOrNull() ?: 0
+            else
+                0
+            if (r == 90 || r == 270) {
+                h = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH).toIntOrNull() ?: 0
+                w = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT).toIntOrNull() ?: 0
+            } else {
+                w = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH).toIntOrNull() ?: 0
+                h = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT).toIntOrNull() ?: 0
+            }
+        } finally {
+            retriever.release()
+        }
+
+        return FFmpegInterface.VideoInfo(inputSize, w, h, r, duration)
+    }
 
     override fun execute(cmd: List<String>, environvenmentVars: Map<String, String>?, handler: FFmpegExecuteResponseHandler?) {
         if (!NativeCpuHelper.supportsFFmpeg)
@@ -106,13 +139,13 @@ class FFmpeg private constructor(context: Context) : FFmpegInterface {
         if (cmd.isEmpty())
             throw IllegalArgumentException("shell command cannot be empty")
 
-        val command = mutableListOf(Utils.getFFmpeg(context))
+        val command = mutableListOf(getFFmpeg(context))
         command.addAll(cmd)
         ffmpegExecuteAsyncTask = FFmpegExecuteAsyncTask(
                 context = context,
                 initBinary = true,
                 cmd = command,
-                envp = Utils.getFFmpegDefaultEnvironment(context, environvenmentVars),
+                envp = getFFmpegDefaultEnvironment(context, environvenmentVars),
                 timeout = timeout,
                 handler = handler)
         ffmpegExecuteAsyncTask!!.execute()
@@ -121,7 +154,7 @@ class FFmpeg private constructor(context: Context) : FFmpegInterface {
     // if unable to find version then return "" to avoid NPE
     @Throws(FFmpegCommandAlreadyRunningException::class)
     override fun deviceFFmpegVersion(): String {
-        val commandResult = FFmpegExecuteAsyncTask.runWaitFor(listOf(Utils.getFFmpeg(context), "-version"), null)
+        val commandResult = FFmpegExecuteAsyncTask.runWaitFor(listOf(getFFmpeg(context), "-version"), null)
         return if (commandResult.success)
             (commandResult.output?.split(" ")?.get(2) ?: "")
         else
@@ -141,7 +174,7 @@ class FFmpeg private constructor(context: Context) : FFmpegInterface {
         private val MINIMUM_TIMEOUT = (10 * 1000).toLong()
         private var instance: FFmpeg? = null
 
-        fun getInstance(context: Context): FFmpeg {
+        fun getInstance(context: Context): FFmpegInterface {
             instance = instance ?: FFmpeg(context)
             return instance!!
         }

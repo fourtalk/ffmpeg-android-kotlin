@@ -6,6 +6,7 @@ apply plugin: 'kotlin-android'
 android {
     compileSdkVersion 25
     buildToolsVersion "25.0.2"
+    publishNonDefault true
 
     defaultConfig {
         minSdkVersion 16
