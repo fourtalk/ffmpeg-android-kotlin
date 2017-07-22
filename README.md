@@ -52,4 +52,4 @@ Licenses
 
 Info
 ----
-Inspired by [WritingMinds](https://github.com/WritingMinds) [java forks](https://github.com/WritingMinds/ffmpeg-android/network)
+Inspired by [WritingMinds](https://github.com/WritingMinds) java [forks](https://github.com/WritingMinds/ffmpeg-android/network)
