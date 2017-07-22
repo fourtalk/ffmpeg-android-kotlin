@@ -2,7 +2,7 @@
 #include <cpu-features.h>
 
 jboolean
-Java_com_github_fourtalk_ffmpegandroid_isCpuSupported(JNIEnv* env, jobject obj)
+Java_com_github_fourtalk_ffmpegandroid_NativeCpuHelper_isCpuSupported(JNIEnv* env, jobject obj)
 {
     AndroidCpuFamily family = android_getCpuFamily();
     if (family == ANDROID_CPU_FAMILY_ARM) {
