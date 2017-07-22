@@ -12,9 +12,11 @@ pushd "$oot"
 case ${MODULE_ARCH} in
   armeabi-v7a | armeabi-v7a-neon)
     CPU='armv7-a'
+	ASM='--enable-yasm --enable-asm'
   ;;
   x86)
     CPU='i686'
+	ASM='--disable-asm --enable-pic'
   ;;
 esac
 
@@ -28,6 +30,7 @@ make distclean
 --cpu="$CPU" \
 --enable-runtime-cpudetect \
 --sysroot="$NDK_SYSROOT" \
+$ASM \
 --disable-debug \
 --disable-symver \
 --disable-ffserver \
@@ -38,8 +41,6 @@ make distclean
 --enable-version3 \
 --enable-pthreads \
 --enable-hardcoded-tables \
---enable-yasm \
---enable-asm \
 --disable-postproc \
 --disable-bsfs \
 --disable-indevs \

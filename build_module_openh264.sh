@@ -10,9 +10,11 @@ pushd openh264
 case ${MODULE_ARCH} in
   armeabi-v7a | armeabi-v7a-neon)
     ARCH=arm
+	ASM=''
   ;;
   x86)
     ARCH=x86
+	ASM='ENABLEPIC=Yes'
   ;;
 esac
 
@@ -22,6 +24,7 @@ make \
   TARGET=android-${ANDROID_TARGET_API_VERSION} \
   SDK_MIN=${ANDROID_API_VERSION} \
   ARCH="${ARCH}" \
+  ENABLEPIC=Yes \
   PREFIX="${TOOLCHAIN_PREFIX}" \
   NDKLEVEL=${ANDROID_API_VERSION} \
   clean
@@ -32,6 +35,7 @@ make \
   TARGET=android-${ANDROID_TARGET_API_VERSION} \
   SDK_MIN=${ANDROID_API_VERSION} \
   ARCH="${ARCH}" \
+  ${ASM} \
   PREFIX="${TOOLCHAIN_PREFIX}" \
   NDKLEVEL=${ANDROID_API_VERSION} \
   -j${NUMBER_OF_CORES} install || exit 1
