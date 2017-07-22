@@ -49,3 +49,7 @@ Licenses
 - openh264: BSD  
 - kotlin wrapper: MIT  
 - build scripts: MIT  
+
+Info
+----
+Inspired by [WritingMinds](https://github.com/WritingMinds) [java forks](https://github.com/WritingMinds/ffmpeg-android/network)
