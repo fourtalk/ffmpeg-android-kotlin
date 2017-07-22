@@ -6,8 +6,8 @@
 
 Supported Architecture
 ----
-* armeabi-v7a (armv7, armv7-neon)
-* x86
+* armeabi-v7a (armv7, armv7-neon, armv8, ...)
+* x86 (x86, x86_64)
 
 Supported Host Environments
 ----
@@ -15,7 +15,7 @@ Supported Host Environments
 * Linux
 * Windows10 Linux Subsystem (**NOTE:** you have to set ANDROID_NDK_ROOT to LINUX version of Android SDK / NDK / build tools)
 
-Instructions
+FFmpeg, openh2664 build instructions
 ----
 * Set environment variable
   [default](set_environment.sh#L54): `~/Android/Sdk/ndk-bundle`  
@@ -26,10 +26,11 @@ Instructions
   3. `./build_android.sh`  - build ffmpeg & libopenh264
 * Find the executable binary in build/{arch}/bin directory.
 
-Kotlin wrapper module
+Kotlin wrapper module instructions
 ----
-1. import ffmpegandroid module  
-2. replace
+1. import [ffmpegandroid module](kotlin-wrapper/ffmpegandroid)  
+2. put your ffmpeg & libopenh264.so into [kotlin-wrapper/ffmpegandroid/ffmpeg](kotlin-wrapper/ffmpegandroid/ffmpeg)
+3. replace
 ```
   compile project(path: ':ffmpegandroid')
 ```
@@ -40,11 +41,11 @@ with
 ```
 in your `app` build.gradle file (`dependencies` section)  
 
-3. [usage example](kotlin-wrapper/app/src/main/java/com/github/fourtalk/kotlin_wrapper/Converter.kt)
+4. [usage example](kotlin-wrapper/app/src/main/java/com/github/fourtalk/kotlin_wrapper/Converter.kt)
 
 Licenses
 ----
 - FFmpeg: LGPL 3.0  
 - openh264: BSD  
-- kotlin wrapper (wrapper): MIT  
+- kotlin wrapper: MIT  
 - build scripts: MIT  
