@@ -2,12 +2,12 @@
 
 * FFmpeg for Android compiled (encoders: [aac & openh264](build_module_ffmpeg.sh#L60))
 * Supports Android N
-* kotlin wrapper for FFmpeg
+* kotlin wrapper for FFmpeg (task queue)
 
 Supported Architecture
 ----
-* armeabi-v7a (armv7, armv7-neon, armv8, ...)
-* x86 (x86, x86_64)
+* armeabi-v7a
+* x86 (with [has text relocations](https://trac.ffmpeg.org/ticket/4928) kludge - disabled asm)
 
 Supported Host Environments
 ----

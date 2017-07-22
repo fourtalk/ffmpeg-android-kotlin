@@ -15,6 +15,9 @@ import java.io.File
 object Converter {
     private const val TAG = "Converter"
 
+    // singleton helper
+    private var ffmpeg: FFmpeg? = null
+
     /**
      * Builds web optimized h264 480p / aac video from [file]
      *
@@ -34,7 +37,12 @@ object Converter {
         val dst = File(file.parent, file.nameWithoutExtension + ".converted.mp4")
 
         try {
-            val ffmpeg = FFmpeg.getInstance(context)
+            if (dst.exists())
+                dst.delete() // FFmpeg hangs if output file exists
+
+            val info = FFmpeg.getVideoInfo(context, fileUri)
+            ffmpeg = ffmpeg ?: FFmpeg(context)
+            // Log.i(TAG, ffmpeg.deviceFFmpegVersion())
 
             val cmd = mutableListOf("-i", file.path)
 
@@ -43,13 +51,12 @@ object Converter {
             cmd.addAll(arrayOf(
                     "-vcodec", "libopenh264",
                     "-profile:v", "high", "-level", "4.0", // -profile:v main -level 3.1
-                    "-b:v", "2M", "-maxrate", "2M", "-bufsize", "2M"))
+                    "-b:v", "2M", "-maxrate", "4M", "-bufsize", "4M"))
 
             // audio-codec
-            cmd.addAll(arrayOf("-acodec", "aac", "-b:a", "128k"))
+            cmd.addAll(arrayOf("-acodec", "aac" /*, "-b:a", "128k" */))
 
             // scale filter
-            val info = ffmpeg.getVideoInfo(context, fileUri)
             val scale = if (info.width > 480 && info.height > 480) {
                 if (info.width >= info.height)
                     "scale=-2:480"
@@ -66,8 +73,7 @@ object Converter {
                     "-movflags", "+faststart",
                     dst.path))
 
-            // Log.i(TAG, ffmpeg.deviceFFmpegVersion())
-            ffmpeg.execute(cmd, handler = object : FFmpegExecuteResponseHandler {
+            ffmpeg?.execute(file.path, cmd, null, object : TaskResponseHandler {
                 override fun onStart() {
                     Log.i(TAG, "#convertVideo.convertVideo onStart")
                 }
@@ -90,6 +96,8 @@ object Converter {
 
                 override fun onFinish() {
                     Log.i(TAG, "#convertVideo.onFinish")
+                    if (ffmpeg?.isEmpty() == true)
+                        ffmpeg = null
                 }
             })
         } catch (e: FFmpegException) {

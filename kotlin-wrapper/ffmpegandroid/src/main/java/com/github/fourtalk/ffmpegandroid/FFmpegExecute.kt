@@ -2,6 +2,7 @@ package com.github.fourtalk.ffmpegandroid
 
 import android.content.Context
 import android.os.AsyncTask
+import android.os.HandlerThread
 import android.util.Log
 import java.io.BufferedReader
 import java.io.File
@@ -9,18 +10,47 @@ import java.io.IOException
 import java.io.InputStreamReader
 import java.util.concurrent.TimeoutException
 
+interface TaskResponseHandler {
+    fun onStart() {}
+
+    fun onFinish() {}
+
+    /**
+     * @param message complete output of the FFmpeg command
+     */
+    fun onSuccess(message: String?)
+
+    /**
+     * @param message current output of FFmpeg command
+     */
+    fun onProgress(message: String?)
+
+    /**
+     * @param message complete output of the FFmpeg command
+     */
+    fun onFailure(message: String?)
+}
+
 internal class FFmpegExecuteAsyncTask(
+        val id: String,
         private val context: Context,
         private var initBinary: Boolean,
         private val cmd: List<String>,
         private val envp: List<String>,
         private val timeout: Long,
-        private val handler: FFmpegExecuteResponseHandler?)
+        private val handler: TaskResponseHandler?,
+        private val internalHandler: Handler)
     : AsyncTask<Void, String, FFmpegExecuteAsyncTask.CommandResult>() {
+
+    internal interface Handler {
+        fun onEndTask(task: FFmpegExecuteAsyncTask)
+    }
 
     private var startTime: Long = 0
     private var process: Process? = null
     private var output = ""
+    private var progressTime: Long = 0
+    private val progressTimeout = 5000L
 
     class CommandResult(val success: Boolean, val output: String?) {
         companion object {
@@ -40,6 +70,7 @@ internal class FFmpegExecuteAsyncTask(
 
     override fun onPreExecute() {
         startTime = System.currentTimeMillis()
+        progressTime = startTime
         handler?.onStart()
     }
 
@@ -50,15 +81,12 @@ internal class FFmpegExecuteAsyncTask(
                 checkBinary()
             }
 
-            Log.d(TAG, "#doInBackground 1")
             process = run(cmd, envp)
-            Log.d(TAG, "#doInBackground 2")
             if (process == null)
                 return CommandResult.getDummyFailureResponse()
-            Log.d(TAG, "#doInBackground 3")
 
             Log.d(TAG, "Running publishing updates method")
-            checkAndUpdateProcess()
+            waitForProcess()
             return CommandResult.getOutputFromProcess(process!!)
         } catch (e: TimeoutException) {
             Log.e(TAG, "FFmpeg timed out", e)
@@ -80,6 +108,8 @@ internal class FFmpegExecuteAsyncTask(
     }
 
     override fun onPostExecute(commandResult: CommandResult) {
+        internalHandler.onEndTask(this)
+
         if (handler != null) {
             output += commandResult.output
             if (commandResult.success)
@@ -91,13 +121,15 @@ internal class FFmpegExecuteAsyncTask(
     }
 
     @Throws(TimeoutException::class, InterruptedException::class)
-    private fun checkAndUpdateProcess() {
-        while (!isProcessCompleted(process)) {
-            Log.d(TAG, "#checkAndUpdateProcess 1")
-
+    private fun waitForProcess() {
+        while (!isCancelled && !isProcessCompleted(process)) {
             // Handling timeout
             if (timeout != java.lang.Long.MAX_VALUE && System.currentTimeMillis() > startTime + timeout)
                 throw TimeoutException("FFmpeg timed out")
+
+            if (progressTimeout != java.lang.Long.MAX_VALUE && System.currentTimeMillis() > progressTime + progressTimeout)
+                throw TimeoutException("FFmpeg progress timed out")
+            progressTime = System.currentTimeMillis()
 
             try {
                 val reader = BufferedReader(InputStreamReader(process!!.errorStream))
@@ -110,11 +142,12 @@ internal class FFmpegExecuteAsyncTask(
                     publishProgress(line)
                     line = reader.readLine()
                 }
-                Log.d(TAG, "#checkAndUpdateProcess $line")
             } catch (e: IOException) {
-                Log.e(TAG, "#checkAndUpdateProcess" + e.message, e)
-                //e.printStackTrace()
+                Log.e(TAG, "#waitForProcess" + e.message, e)
             }
+
+            if (!isCancelled && !isProcessCompleted(process))
+                Thread.sleep(10)
         }
     }
 
