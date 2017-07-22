@@ -10,7 +10,7 @@ Supported Architecture
 * x86
 
 Supported Host Environments
----
+----
 * MacOS
 * Linux
 * Windows10 Linux Subsystem (**NOTE:** you have to set ANDROID_NDK_ROOT to LINUX version of Android SDK / NDK / build tools)
@@ -25,6 +25,22 @@ Instructions
   2. `./update_modules.sh` - update submodules and libraries
   3. `./build_android.sh`  - build ffmpeg & libopenh264
 * Find the executable binary in build/{arch}/bin directory.
+
+Kotlin wrapper module
+----
+1. import ffmpegandroid module  
+2. replace
+```
+  compile project(path: ':ffmpegandroid')
+```
+with
+```
+  debugCompile project(path: ':ffmpegandroid', configuration: "debug") // force compile debug module
+  releaseCompile project(path: ':ffmpegandroid', configuration: "release")
+```
+in your `app` build.gradle file (`dependencies` section)  
+
+3. [usage example](kotlin-wrapper/app/src/main/java/com/github/fourtalk/kotlin_wrapper/Converter.kt)
 
 Licenses
 ----
