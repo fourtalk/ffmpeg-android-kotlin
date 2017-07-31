@@ -19,11 +19,14 @@ class FFmpeg(context: Context) {
 
     class VideoInfo(
             val fileSize: Long,
-            val width: Int,
-            val height: Int,
+            val streamWidth: Int,
+            val streamHeight: Int,
             val rotation: Int,
             val duration: Long
-    )
+    ) {
+        val displayWidth: Int = if (rotation == 90 || rotation == 270) streamHeight else streamWidth
+        val displayHeight: Int = if (rotation == 90 || rotation == 270) streamWidth else streamHeight
+    }
 
     private val context: Context = context.applicationContext
     private var timeout = java.lang.Long.MAX_VALUE
@@ -54,13 +57,8 @@ class FFmpeg(context: Context) {
                     retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION).toIntOrNull() ?: 0
                 else
                     0
-                if (r == 90 || r == 270) {
-                    h = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH).toIntOrNull() ?: 0
-                    w = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT).toIntOrNull() ?: 0
-                } else {
-                    w = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH).toIntOrNull() ?: 0
-                    h = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT).toIntOrNull() ?: 0
-                }
+                w = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH).toIntOrNull() ?: 0
+                h = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT).toIntOrNull() ?: 0
             } finally {
                 retriever.release()
             }

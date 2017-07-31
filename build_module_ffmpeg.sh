@@ -12,7 +12,7 @@ pushd "$oot"
 case ${MODULE_ARCH} in
   armeabi-v7a | armeabi-v7a-neon)
     CPU='armv7-a'
-	ASM='--enable-yasm --enable-asm'
+	ASM='--enable-asm'
   ;;
   x86)
     CPU='i686'
@@ -55,12 +55,14 @@ $ASM \
 --enable-filter=copy \
 --enable-filter=crop \
 --enable-filter=cropdetect \
+--enable-filter=aresample \
+ \
 --disable-muxers \
 --enable-muxer=mp4 \
 --enable-muxer=h264 \
+ \
 --disable-encoders \
 --enable-encoder=aac \
- \
 --enable-libopenh264 \
 --enable-encoder=libopenh264 \
 --enable-decoder=libopenh264 \

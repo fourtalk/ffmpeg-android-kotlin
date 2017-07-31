@@ -45,7 +45,8 @@ object Converter {
             ffmpeg = ffmpeg ?: FFmpeg(context)
             // Log.i(TAG, ffmpeg.deviceFFmpegVersion())
 
-            val cmd = mutableListOf("-i", file.path)
+            val cmd = mutableListOf("-noautorotate", // copy displaymatrix to output
+                    "-i", file.path)
 
             // video-codec
             //cmd.addAll(arrayOf("-vcodec", "copy")) // low-end device
@@ -55,8 +56,8 @@ object Converter {
                     "-b:v", "2M", "-maxrate", "4M", "-bufsize", "4M"))
 
             // scale filter
-            if (info.width > VIDEO_SIZE && info.height > VIDEO_SIZE) {
-                if (info.width >= info.height)
+            if (info.streamWidth > VIDEO_SIZE && info.streamHeight > VIDEO_SIZE) {
+                if (info.streamWidth >= info.streamHeight)
                     cmd.addAll(arrayOf("-vf", "scale=-2:$VIDEO_SIZE"))
                 else
                     cmd.addAll(arrayOf("-vf", "scale=$VIDEO_SIZE:-2"))
@@ -68,7 +69,7 @@ object Converter {
             // web format & etc.
             cmd.addAll(arrayOf(
                     "-threads", "1",
-                    "-movflags", "+faststart",
+                    "-movflags", "+faststart", // metadata fragmentation
                     dst.path))
 
             ffmpeg?.execute(file.path, cmd, null, object : TaskResponseHandler {
@@ -77,6 +78,14 @@ object Converter {
                 }
 
                 override fun onProgress(message: String?) {
+                    /*// frame=   99 fps= 18 q=-0.0 size=     768kB time=00:00:03.28 bitrate=1915.8kbits/s speed=0.586x
+                    val millisec = message?.substringAfter("time=")?.substringBefore(" ").millisecFromTimeValue(null)
+                    if (millisec != null) {
+                        progress = if (info.duration < 1)
+                            1f
+                        else
+                            Math.min(1f, millisec.toFloat() / info.duration)
+                    }*/
                     Log.d(TAG, "#convertVideo.onProgress $message")
                 }
 
