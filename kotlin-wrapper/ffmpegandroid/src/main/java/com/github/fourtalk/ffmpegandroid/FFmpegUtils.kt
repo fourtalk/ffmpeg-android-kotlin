@@ -82,7 +82,7 @@ internal fun getH264(context: Context): String {
 
 internal fun getFFmpegDefaultEnvironment(context: Context, envp: Map<String, String>?): List<String> {
     val rc = mutableListOf(
-            "LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:" + getExecuteDir(context),
+            "LD_LIBRARY_PATH=" + getExecuteDir(context),
             "ANDROID_DATA=/data",
             "ANDROID_ROOT=/system")
     if (envp != null)

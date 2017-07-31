@@ -17,6 +17,7 @@ object Converter {
 
     // singleton helper
     private var ffmpeg: FFmpeg? = null
+    private const val VIDEO_SIZE = 360
 
     /**
      * Builds web optimized h264 480p / aac video from [file]
@@ -53,19 +54,16 @@ object Converter {
                     "-profile:v", "high", "-level", "4.0", // -profile:v main -level 3.1
                     "-b:v", "2M", "-maxrate", "4M", "-bufsize", "4M"))
 
+            // scale filter
+            if (info.width > VIDEO_SIZE && info.height > VIDEO_SIZE) {
+                if (info.width >= info.height)
+                    cmd.addAll(arrayOf("-vf", "scale=-2:$VIDEO_SIZE"))
+                else
+                    cmd.addAll(arrayOf("-vf", "scale=$VIDEO_SIZE:-2"))
+            }
+
             // audio-codec
             cmd.addAll(arrayOf("-acodec", "aac" /*, "-b:a", "128k" */))
-
-            // scale filter
-            val scale = if (info.width > 480 && info.height > 480) {
-                if (info.width >= info.height)
-                    "scale=-2:480"
-                else
-                    "scale=480:-2"
-            } else
-                ""
-            if (scale.isNotEmpty())
-                cmd.addAll(arrayOf("-vf", scale))
 
             // web format & etc.
             cmd.addAll(arrayOf(
