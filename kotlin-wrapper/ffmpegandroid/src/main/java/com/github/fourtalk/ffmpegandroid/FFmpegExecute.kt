@@ -57,6 +57,7 @@ internal class FFmpegExecuteAsyncTask(
             fun getDummyFailureResponse() = CommandResult(false, "")
 
             fun getOutputFromProcess(process: Process): CommandResult {
+                process.waitFor()
                 val output = if (success(process.exitValue()))
                     convertInputStreamToString(process.inputStream)
                 else
@@ -75,13 +76,15 @@ internal class FFmpegExecuteAsyncTask(
     }
 
     override fun doInBackground(vararg params: Void): CommandResult {
+        if (!isCancelled)
         try {
             if (initBinary) {
                 initBinary = false
                 checkBinary()
             }
 
-            process = run(cmd, envp)
+            if (!isCancelled)
+                process = run(cmd, envp)
             if (process == null)
                 return CommandResult.getDummyFailureResponse()
 
@@ -116,6 +119,16 @@ internal class FFmpegExecuteAsyncTask(
                 handler.onSuccess(output)
             else
                 handler.onFailure(output)
+            handler.onFinish()
+        }
+    }
+
+    override fun onCancelled(result: CommandResult?) {
+        super.onCancelled(result)
+        internalHandler.onEndTask(this)
+
+        if (handler != null) {
+            handler.onFailure(null)
             handler.onFinish()
         }
     }
@@ -195,7 +208,11 @@ internal class FFmpegExecuteAsyncTask(
         return prepareFile(h264File) && prepareFile(ffmpegFile)
     }
 
-    fun kill(): Boolean = !isCancelled && cancel(true)
+    fun kill(): Boolean {
+        val rc = !isCancelled && cancel(true)
+        process?.destroy()
+        return rc
+    }
 
     companion object {
         private val TAG = "FFmpeg"

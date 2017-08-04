@@ -135,7 +135,11 @@ class FFmpeg(context: Context) {
      * Kill Running FFmpeg process
      * @return true if process is killed successfully
      */
-    fun killRunningProcesses(taskId: String): Boolean = tasks.get(taskId)?.kill() ?: true
+    fun killRunningProcesses(taskId: String): Boolean {
+        val task = tasks[taskId]
+        tasks.remove(taskId)
+        return task?.kill() ?: true
+    }
 
     /**
      * Timeout for FFmpeg process, should be minimum of 10 seconds
