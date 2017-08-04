@@ -119,7 +119,7 @@ internal fun openContentInputStream(context: Context, uri: Uri): InputStream {
         return context.contentResolver.openInputStream(uri)
     }
     catch (ex: Exception) {
-        return FileInputStream(uri.toString())
+        return FileInputStream(uri.path)
     }
 }
 
@@ -143,3 +143,7 @@ internal fun InputStream.getInputStreamReadLength(): Int {
     }
     return 0
 }
+
+fun String.withFileUriPrefix(): String = "file://" + this
+
+fun File.withFileUriPrefix(): Uri = Uri.parse(this.path.withFileUriPrefix())

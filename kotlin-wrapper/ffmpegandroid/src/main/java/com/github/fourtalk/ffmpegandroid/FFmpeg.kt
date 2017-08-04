@@ -84,7 +84,8 @@ class FFmpeg(context: Context) {
      * @param cmd command to execute
      * @param ffmpegExecuteResponseHandler [FFmpegExecuteResponseHandler]
      * @throws FFmpegNotSupportedException
-     * @throws FFmpegCommandAlreadyRunningException
+     * @throws IllegalArgumentException
+     * @throws FFmpegDuplicateTaskIdException
      */
     fun execute(taskId: String, cmd: List<String>, environvenmentVars: Map<String, String>?, handler: TaskResponseHandler?) {
         if (!NativeCpuHelper.supportsFFmpeg)

@@ -23,10 +23,10 @@ object Converter {
      * Builds web optimized h264 480p / aac video from [file]
      *
      * @param file source video file (absolute path)
-     * @param fileUri content uri for [file]
+     * @param target output video file (absolute path)
      * @param callback events
      */
-    fun convertVideo(context: Context, file: File, fileUri: Uri, callback: (success: Boolean, error: String?, convertedFile: File) -> Unit) {
+    fun convertVideo(context: Context, file: File, target: File, callback: (success: Boolean, error: String?, convertedFile: File) -> Unit) {
         //if (!hasPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, CONVERTER_PERMISSION_REQUEST))
         //    return
 
@@ -35,13 +35,12 @@ object Converter {
         //}
 
         Log.i(TAG, "#convertVideo $file")
-        val dst = File(file.parent, file.nameWithoutExtension + ".converted.mp4")
 
         try {
-            if (dst.exists())
-                dst.delete() // FFmpeg hangs if output file exists
+            if (target.exists())
+                target.delete() // FFmpeg hangs if output file exists
 
-            val info = FFmpeg.getVideoInfo(context, fileUri)
+            val info = FFmpeg.getVideoInfo(context, target.withFileUriPrefix())
             ffmpeg = ffmpeg ?: FFmpeg(context)
             // Log.i(TAG, ffmpeg.deviceFFmpegVersion())
 
@@ -70,7 +69,7 @@ object Converter {
             cmd.addAll(arrayOf(
                     "-threads", "1",
                     "-movflags", "+faststart", // metadata fragmentation
-                    dst.path))
+                    target.path))
 
             ffmpeg?.execute(file.path, cmd, null, object : TaskResponseHandler {
                 override fun onStart() {
@@ -91,14 +90,14 @@ object Converter {
 
                 override fun onFailure(message: String?) {
                     Log.e(TAG, "#convertVideo.onFailure $message")
-                    callback(false, message, dst)
-                    if (dst.exists())
-                        dst.delete()
+                    callback(false, message, target)
+                    if (target.exists())
+                        target.delete()
                 }
 
                 override fun onSuccess(message: String?) {
                     Log.i(TAG, "#convertVideo.onSuccess $message")
-                    callback(dst.exists(), message, dst)
+                    callback(target.exists(), message, target)
                 }
 
                 override fun onFinish() {
@@ -109,9 +108,9 @@ object Converter {
             })
         } catch (e: FFmpegException) {
             Log.e(TAG, "#convertVideo " + e.message, e)
-            callback(false, e.message, dst)
-            if (dst.exists())
-                dst.delete()
+            callback(false, e.message, target)
+            if (target.exists())
+                target.delete()
         }
     }
 }
