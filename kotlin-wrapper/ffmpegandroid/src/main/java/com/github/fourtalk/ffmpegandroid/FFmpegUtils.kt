@@ -56,7 +56,7 @@ fun copyBinaryFromAssetsToData(context: Context, fileNameFromAssets: String, out
         } finally {
             dst.close()
         }
-    } catch (e: IOException) {
+    } catch (e: Throwable) {
         Log.e(TAG, "issue in coping binary from assets to data. ", e)
     } finally {
         src?.close()

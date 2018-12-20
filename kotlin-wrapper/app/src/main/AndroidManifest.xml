@@ -1,7 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-
-          package="com.github.fourtalk.kotlin_wrapper"
-    >
+          package="com.github.fourtalk.kotlin_wrapper">
 
     <application
         android:allowBackup="false"
