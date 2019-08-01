@@ -41,14 +41,14 @@ class FFmpeg(context: Context) {
          */
         @Throws(FileNotFoundException::class)
         fun getVideoInfo(context: Context, uri: Uri): VideoInfo {
-            val inputSize = openContentInputStream(context, uri).use {
+            val inputSize = openContentInputStream(context, uri)?.use {
                 it.getInputStreamReadLength()
-            }.toLong()
+            }?.toLong() ?: 0L
 
-            var duration: Long = 0L
-            var w: Int = 0
-            var h: Int = 0
-            var r: Int = 0
+            val duration: Long
+            val w: Int
+            val h: Int
+            val r: Int
             val retriever = MediaMetadataRetriever()
             try {
                 retriever.setDataSource(context, uri)

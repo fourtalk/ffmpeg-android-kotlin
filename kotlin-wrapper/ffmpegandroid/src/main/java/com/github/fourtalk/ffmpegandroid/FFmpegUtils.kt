@@ -9,9 +9,11 @@ import java.io.*
 internal class NativeCpuHelper {
     external fun isCpuSupported(): Boolean
 
+    @Suppress("DEPRECATION")
     companion object {
         init {
-            System.loadLibrary("cpucheck")
+            if (Build.CPU_ABI.toLowerCase() == "armeabi-v7a")
+                System.loadLibrary("cpucheck")
         }
 
         val supportsFFmpeg: Boolean =
@@ -114,7 +116,7 @@ internal fun isProcessCompleted(process: Process?): Boolean =
         false
     }
 
-internal fun openContentInputStream(context: Context, uri: Uri): InputStream {
+internal fun openContentInputStream(context: Context, uri: Uri): InputStream? {
     try {
         return context.contentResolver.openInputStream(uri)
     }
