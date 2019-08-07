@@ -2,6 +2,7 @@ package com.github.fourtalk.ffmpegandroid
 
 import android.content.Context
 import android.os.AsyncTask
+import android.os.Build
 import android.os.HandlerThread
 import android.util.Log
 import java.io.BufferedReader
@@ -167,9 +168,9 @@ internal class FFmpegExecuteAsyncTask(
     val isProcessCompleted: Boolean
         get() = isProcessCompleted(process)
 
-    private fun isAssetFileSizeDiffer(file: File): Boolean {
+    private fun isAssetFileSizeDiffer(file: File, assetFileName: String): Boolean {
         try {
-            val assetsSize = context.assets.open(NativeCpuHelper.assetsDir + File.separator + file.name).use {
+            val assetsSize = context.assets.open(assetFileName).use {
                 it.available()
             }
             return assetsSize > 0 && assetsSize < Int.MAX_VALUE/4 // InputStream.available() can fail
@@ -181,13 +182,17 @@ internal class FFmpegExecuteAsyncTask(
     }
 
     private fun prepareFile(file: File): Boolean {
-        if (file.exists() && isAssetFileSizeDiffer(file) && !file.delete()) {
+        val assetFileName = NativeCpuHelper.assetsDir(context) + File.separator + file.name
+        Log.i(TAG, "assets = ${context.assets.list(Build.CPU_ABI.toLowerCase())?.joinToString()}")
+        Log.i(TAG, "assetFileName = $assetFileName")
+
+        if (file.exists() && isAssetFileSizeDiffer(file, assetFileName) && !file.delete()) {
             Log.e(TAG, "${file.name} is out of date and cannot be updated")
             return false
         }
         if (!file.exists()) {
             val isFileCopied = copyBinaryFromAssetsToData(context,
-                    fileNameFromAssets = NativeCpuHelper.assetsDir + File.separator + file.name,
+                    fileNameFromAssets = assetFileName,
                     outputFileName = file.name)
 
             if (isFileCopied) {

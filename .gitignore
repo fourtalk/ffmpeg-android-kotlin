@@ -1,2 +1,4 @@
 build/
 toolchain-android/
+kotlin-wrapper/ffmpegandroid/ffmpeg/arm64-v8a/
+kotlin-wrapper/ffmpegandroid/ffmpeg/x86_64/

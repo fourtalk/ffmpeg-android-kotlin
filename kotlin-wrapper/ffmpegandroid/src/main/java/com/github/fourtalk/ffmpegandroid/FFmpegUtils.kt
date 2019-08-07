@@ -23,13 +23,17 @@ internal class NativeCpuHelper {
                     else -> false
                 }
 
-        val assetsDir: String =
-                if (Build.CPU_ABI.toLowerCase().startsWith("arm"))
-                    "armeabi-v7a"
-                else if (Build.CPU_ABI.toLowerCase().startsWith("x86"))
-                    "x86"
-                else
-                    "armeabi-v7a" // fallback
+        fun assetsDir(context: Context): String =
+            if (context.assets.list(Build.CPU_ABI.toLowerCase())?.contains(ffmpegFileName) == true)
+                Build.CPU_ABI.toLowerCase()
+            else
+            // старая схема для apk (без сборки x64)
+            if (Build.CPU_ABI.toLowerCase().startsWith("arm"))
+                "armeabi-v7a"
+            else if (Build.CPU_ABI.toLowerCase().startsWith("x86"))
+                "x86"
+            else
+                "armeabi-v7a" // fallback
     }
 }
 
